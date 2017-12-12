@@ -2,12 +2,15 @@
 
 namespace WebService.Enum
 {
-    public enum Status
+    public enum InsuranceStatus
     {
         [Display(Name = "SUCCESS")]
         Success = 1,
 
         [Display(Name = "FAIL")]
-        Fail = 2
+        Fail = 2,
+
+        [Display(Name = "Published")]
+        Published = 3
     }
 }
