@@ -81,7 +81,6 @@
   <ItemGroup>
     <Content Include="Services\InvoiceService.asmx" />
     <Content Include="Web.config" />
-    <Content Include="xm.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entity\InvoiceDetail.cs" />

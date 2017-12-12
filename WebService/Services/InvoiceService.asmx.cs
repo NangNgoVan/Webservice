@@ -40,11 +40,12 @@ namespace WebService.Services
             var token = Login(new LoginModel {UserName = InHeader.Username, Password = InHeader.Password});
             if (string.IsNullOrEmpty(token))
                 return NewReplaceAdjustInvoiceMesages(400, "Tài khoản hoặc mật khẩu không đúng!");
-
+            
             using (var client = new HttpClient())
             {
                 //specify to use TLS 1.2 as default connection
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
                 client.BaseAddress = new Uri(BaseUri);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -180,6 +181,7 @@ namespace WebService.Services
             {
                 //specify to use TLS 1.2 as default connection
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
                 client.BaseAddress = new Uri(BaseUri);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
