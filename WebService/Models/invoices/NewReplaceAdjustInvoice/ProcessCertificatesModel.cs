@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace WebService.Models.invoices.NewReplaceAdjustInvoice
 {
-    public class CertificatesModel
+    public class ProcessCertificatesModel
     {
         /// <summary>
         /// ID của thông điệp
@@ -16,11 +16,27 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// </summary>
         public DateTime MessageTime { get; set; }
 
+        /// <summary>
+        /// Số hợp đồng bảo hiểm liên kết với GCN
+        /// </summary>
+        public string PolicyNo { get; set; }
+
+        /// <summary>
+        /// Thao tác trên hợp đồng ở core bảo hiểm. Có các giá trị tương ứng sau:
+        /// NewPolicy: Hợp đồng mới
+        /// Endorsement: Sửa đổi bố sung
+        /// Cancel: Huỷ hợp đồng
+        /// Termination: Kết thúc hợp đồng
+        /// CancelRestored: Phục hồi lại hợp đồng bị huỷ
+        ///  TerminationRestored: Phục hồi lại hợp đồng bị kết thúc
+        /// </summary>
+        public string PolicyOperation { get; set; }
+
         [XmlElement(IsNullable = false)]
         /// <summary>
         /// Group tag bắt đầu cho danh sách các giấy chứng nhận cần huỷ (Chỉ khi có giấy chứng nhận cần huỷ) 
         /// </summary>
-        public List<RemovingCertificates> RemovingCertificates { get; set; }
+        public RemovingCertificates RemovingCertificates { get; set; }
 
         [XmlElement(IsNullable = false)]
         /// <summary>
@@ -28,26 +44,31 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// </summary>
         public NewCertificates NewCertificates { get; set; }
 
-        /// <summary>
-        /// Mã người lập giấy chứng nhận trên core bảo hiểm
-        /// </summary>
-        public int CreatorCode { get; set; }
 
         /// <summary>
-        /// Mã người duyệt trên core bảo hiểm
+        /// Mã khách hàng trên core bảo hiểm
         /// </summary>
-        public int ApproverCode { get; set; }
-        //public int CreatorCode { get; set; }
+        public string CustomerCode { get; set; }
+
+        /// <summary>
+        /// Mã của người lập giấy chứng nhận
+        /// </summary>
+        public string CreatorCode { get; set; }
+
+        /// <summary>
+        /// Mã của người duyệt giấy chứng nhận
+        /// </summary>
+        public string ApproverCode { get; set; }
 
         /// <summary>
         /// Mã phòng ban trên core bảo hiểm
         /// </summary>
-        public int DepartmentCode { get; set; }
+        public string DepartmentCode { get; set; }
 
         /// <summary>
-        /// Mã chi nhánh/tổng công ty trên core bảo hiểm
+        /// Mã chi nhánh của giấy chứng nhận
         /// </summary>
-        public int BranchCode { get; set; }
+        public string BranchCode { get; set; }
     }
 
     public class RemovingCertificates
@@ -55,9 +76,10 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// <summary>
         /// Số giấy chứng nhận cần huỷ.
         /// </summary>
-        public List<string> CertificateNo { get; set; }
+        [XmlElement(IsNullable = false)]
+        public string CertificateSerie { get; set; }
     }
-
+    
     public class NewCertificates
     {
         [XmlElement(IsNullable = false)]
@@ -76,9 +98,24 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         public string CertificateNo { get; set; }
 
         /// <summary>
+        /// Số serie của giấy chứng nhận bảo hiểm cấp 
+        /// </summary>
+        public string CertificateSerie { get; set; }
+
+        /// <summary>
         /// Tên chủ xe, lấy từ trường “Chủ xe" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Tên” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
         public string OwnerName { get; set; }
+
+        /// <summary>
+        /// Mã số thuế (đối với khách hàng doanh nghiệp), lấy từ thông tin của khách hàng trong cửa sổ “Hệ thống mã khách hàng bảo hiểm” truy cập từ menu Hệ thống->Khách hàng và đối tác->Mã khách hàng
+        /// </summary>
+        public string TaxCode { get; set; }
+
+        /// <summary>
+        /// Số Chứng minh thư nhân dân của chủ xe (đối với khách hàng cá nhân), lấy từ thông tin của khách hàng trong cửa sổ “Hệ thống mã khách hàng bảo hiểm” truy cập từ menu Hệ thống->Khách hàng và đối tác->Mã khách hàng
+        /// </summary>
+        public string IDNumber { get; set; }
 
         /// <summary>
         /// Địa chỉ chủ xe, lấy từ trường “Địa chỉ" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Địa chỉ” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
@@ -91,14 +128,14 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         public string PhoneNumber { get; set; }
 
         /// <summary>
+        /// Email của khách hàng, lấy từ thông tin của khách hàng trong cửa sổ “Hệ thống mã khách hàng bảo hiểm” truy cập từ menu Hệ thống->Khách hàng và đối tác->Mã khách hàng
+        /// </summary>
+        public string Email { get; set; }
+
+        /// <summary>
         /// Biển kiểm soát, lấy từ trường “Biển xe" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Biển xe” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
         public string VehicleNo { get; set; }
-
-        /// <summary>
-        /// Người/Đơn vị thụ hưởng, lấy từ trường “Ng.hưởng" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Tên"trong tab “Người hưởng” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public string Beneficiary { get; set; }
 
         /// <summary>
         /// Số khung, lấy từ trường “Số khung" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Số khung” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
@@ -148,6 +185,11 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         public int SeatCount { get; set; }
 
         /// <summary>
+        /// Giá trị xe, lấy từ trường “G.trị xe" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giá k.báo” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
+        /// </summary>
+        public int VehicleValue { get; set; }
+
+        /// <summary>
         /// Mục đích sử dụng, lấy từ trường “M.đích SD" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Biển xe” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”. Có hai giá trị:
         /// Kinh doanh
         /// Không kinh doanh
@@ -178,68 +220,53 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// </summary>
         public Vehicle Vehicle { get; set; }
 
-        [XmlElement(IsNullable = false)]
-        /// <summary>
-        /// Group Tag bắt đầu cho các Điều  khoản bổ sung
-        /// </summary>
-        public Clauses Clauses { get; set; }
-
-        /// <summary>
-        /// Thời gian bắt đầu hiệu lực , lấy từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public string CoverFromTime { get; set; }
-
-        /// <summary>
-        /// Thời gian hết hiệu lực, lấy từ trường “Giờ hết hiệu lực" và “Ngày hết hiệu lực” (“Đến”) trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giờ hết hiệu lực" và “Ngày hết hiệu lực” (“Đến”) trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public string CoverToTime { get; set; }
-
         /// <summary>
         /// Tổng Phí bảo hiểm (Có VAT), lấy từ trường “Tổng phí” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Ttoán” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
         public string TotalFee { get; set; }
 
         /// <summary>
-        /// Ngày thanh toán phí, lấy thông tin từ tab “Kỳ thanh toán" trong màn hình “Hợp đồng bảo hiểm xe cơ giới” hoặc từ tab “Kỳ thanh toán” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”.
-        /// -Trường hợp chỉ có một kỳ thanh toán thì lấy ngày công nợ khách hàng trên phần mềm trong(trường hợp thanh toán đủ phí)
-        /// - Trường hợp nhiều kỳ thanh toán thì không lấy giá trị nào cả
+        /// Tổng tất cả thuế VAT của tất cả các nghiệp vụ bảo hiểm
+        /// </summary>
+        public string VAT { get; set; }
+
+        /// <summary>
+        /// Tổng Phí bảo hiểm (Có VAT), lấy từ trường “Tổng phí” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Ttoán” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
+        /// </summary>
+        public string TotalFeeWithVAT { get; set; }
+
+        /// <summary>
+        /// Thời gian bắt đầu hiệu lực , lấy từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
+        /// </summary>
+        public DateTime CoverFromTime { get; set; }
+
+        /// <summary>
+        /// Thời gian hết hiệu lực, lấy từ trường “Giờ hết hiệu lực" và “Ngày hết hiệu lực” (“Đến”) trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giờ hết hiệu lực" và “Ngày hết hiệu lực” (“Đến”) trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
+        /// </summary>
+        public DateTime CoverToTime { get; set; }
+
+        /// <summary>
+        /// Người/Đơn vị thụ hưởng bảo hiêm, lấy từ trường “Ng.hưởng" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Tên"trong tab “Người hưởng” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
+        /// </summary>
+        public string Beneficiary { get; set; }
+
+        /// <summary>
+        ///Thời điểm nộp phí, lấy từ trường “Thời điểm nôp phí” mới thêm vào trong trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Thời điểm nôp phí” mới thêm trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”.
+        ///Lưu ý: Nếu có trường thời điểm nộp phí thì sẽ không có trường thời hạn thanh toán phí và ngược lại.Trên hệ thống ấn chỉ điện tử, nếu có trường thời điểm nộp phí thì trong bản thể hiện của ấn chỉ điện tử sẽ hiển thị thời điểm nộp phí, nếu có trường thời hạn nộp phí sẽ hiển thị thời hạn nộp phí
         /// </summary>
         public string PaidDate { get; set; }
 
         /// <summary>
-        /// Họ và tên Người cấp
+        /// Thời hạn thanh toán phí, lấy thông tin từ tab “Kỳ thanh toán" trong màn hình “Hợp đồng bảo hiểm xe cơ giới” hoặc từ tab “Kỳ thanh toán” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”.
+        /// -Trường hợp chỉ có một kỳ thanh toán thì lấy ngày công nợ khách hàng trên phần mềm(trường hợp thanh toán đủ phí)
+        /// - Trường hợp nhiều kỳ thanh toán thì không lấy giá trị nào cả
         /// </summary>
-        public string Issuer { get; set; }
+        public string PaymentDueDate { get; set; }
 
         /// <summary>
-        /// Kiểu khai thác, lấy từ trường “Khai thác" và trả về các giá trị tương ứng sau:
-        /// T-Tự: Cán bộ kinh doanh
-        /// D-Đại lý: Đại lý
-        /// M-Môi giới: Hình thức khác
-        /// N-Ngân hàng: Hình thức khác
+        /// Số serie của giấy chứng nhận bị thay thế. Nếu có trường này thì giấy chứng nhận mới sẽ thay thế cho giấy chứng nhận cũ với số giấy chứng nhận bị thay thế này
         /// </summary>
-        public string SellerType { get; set; }
-
-        /// <summary>
-        /// Mã của người lập giấy chứng nhận
-        /// </summary>
-        public string CreatorCode { get; set; }
-
-        /// <summary>
-        /// Mã chi nhánh của giấy chứng nhận
-        /// </summary>
-        public string BranchCode { get; set; }
-
-        /// <summary>
-        /// Mã của người duyệt giấy chứng nhận
-        /// </summary>
-        public string ApproverCode { get; set; }
-
-        /// <summary>
-        /// Số giấy chứng nhận bị thay thế. Nếu có trường này thì giấy chứng nhận mới sẽ thay thế cho giấy chứng nhận cũ với số giấy chứng nhận bị thay thế này
-        /// </summary>
-        public string ReplacedCertificateNo { get; set; }
-
+        public string ReplacedCertificateSerie { get; set; }
     }
 
     public class ThirdParties
@@ -256,12 +283,7 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         ///màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
         public int ThirdPartyLiabilityAmount { get; set; }
-
-        /// <summary>
-        /// Mức trách nhiệm tăng thêm về người hành khách, lấy từ cột “Tiền" của mục bảo hiểm “TN với hành khách” loại bảo hiểm “Tự nguyện” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public int PassengerLiabilityAmount { get; set; }
-
+        
         /// <summary>
         /// Mức trách nhiệm tăng thêm về tài sản, lấy từ cột “Tiền" của mục bảo hiểm “TN với NTB về tài sản” loại bảo hiểm “Tự nguyện” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
@@ -290,10 +312,8 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// </summary>
         public int LiabilityAmount { get; set; }
 
-        /// <summary>
-        /// Mức khấu trừ bồi thường, lấy từ trường “Mức tiền miễn thường" của nghiệp vụ “TNDS chủ xe đối với hàng hoá vận chuyển trên xe” trong tab “Điều khoản bổ sung” trong màn hình “GCN xe theo hợp đồng” hoặc trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public int DeductibleAmount { get; set; }
+        [XmlElement(IsNullable = false)]
+        public Clauses Clauses { get; set; }
 
         /// <summary>
         /// Phí bảo hiểm (Có VAT), bẳng tổng mức phí (Có VAT) của các mức phí lấy từ cột “Phí" của mục bảo hiểm “TN với hàng hoá”, loại bảo hiểm “Tự nguyện” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới 
@@ -332,23 +352,12 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
     public class Vehicle
     {
         /// <summary>
-        /// Yêu cầu bảo hiểm, lấy từ trường “Chọn BH" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Chọn BH” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// Có hai giá trị:
-        /// Toàn bộ
-        /// Thân vỏ
-        /// Hiện tai MIC chỉ có một loại bảo hiểm là Toàn bộ
-        /// </summary>
-        public string Scope { get; set; }
-
-        /// <summary>
-        /// Giá trị xe, lấy từ trường “G.trị xe" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giá k.báo” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
-        /// </summary>
-        public string VehicleValue { get; set; }
-
-        /// <summary>
         /// Số tiền bảo hiểm theo yêu  cầu, lấy từ cột “Tiền" của mục bảo hiểm “TN với vật chất xe” loại bảo hiểm “Tự nguyện” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
         public string InsuranceValue { get; set; }
+
+        [XmlElement(IsNullable = false)]
+        public Clauses Clauses { get; set; }
 
         /// <summary>
         /// Mức miền bồi thường, lấy từ trường “Mức tiền miễn thường" của nghiệp vụ “Bảo hiểm thiệt hại vật chất xe” trong tab “Điều khoản bổ sung” trong màn hình “GCN xe theo hợp đồng” hoặc trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
@@ -371,6 +380,6 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// <summary>
         /// Danh sách các mã điều khoản bổ sung, trong trường “Số BS” của tab “Điều khoản bổ sung" trong màn hình “GCN xe theo hợp đồng” hoặc tab “Điều khoản bổ sung” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
-        public string ClauseCode { get; set; }
+        public List<string> ClauseCode { get; set; }
     }
 }

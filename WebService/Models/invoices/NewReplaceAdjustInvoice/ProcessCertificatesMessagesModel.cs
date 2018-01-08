@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Xml.Serialization;
 
 namespace WebService.Models.invoices.NewReplaceAdjustInvoice
 {
-    public class CertificatesMessagesModel
+    public class ProcessCertificatesMessagesModel
     {
         /// <summary>
         /// ID của thông điệp

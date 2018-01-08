@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace WebService.Models.invoices.NewReplaceAdjustInvoice
 {
+    /// <summary>
+    /// CreateInsuranceInvoice : tạo mới
+    /// 
+    /// </summary>
     public class NewReplaceAdjustInvoiceModel
     {
         /// <summary>

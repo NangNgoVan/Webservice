@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
 using System.Net.Http;
@@ -121,14 +120,14 @@ namespace WebService.Services
 
         [WebMethod(Description = "Bên gửi: Hệ thống core bảo hiểm của CMC. Bên nhận: Hệ thống HDĐT của EInvoice")]
         [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public CertificatesMessagesModel ProcessCertificates(CertificatesModel XMLINPUT)
+        public ProcessCertificatesMessagesModel ProcessCertificates(ProcessCertificatesModel XMLINPUT)
         {
             if (string.IsNullOrEmpty(InHeader.Username) || string.IsNullOrEmpty(InHeader.Password))
-                return new CertificatesMessagesModel();
+                return new ProcessCertificatesMessagesModel();
 
             var token = Login(new LoginModel { UserName = InHeader.Username, Password = InHeader.Password });
             if (string.IsNullOrEmpty(token))
-                return new CertificatesMessagesModel();
+                return new ProcessCertificatesMessagesModel();
 
             using (var client = new HttpClient())
             {
@@ -141,7 +140,7 @@ namespace WebService.Services
                 HttpContent content = new StringContent(XMLINPUT.JsonSerilaize(), Encoding.UTF8,
                     "application/json");
                 var response = client.PostAsync("/api/invoices/process-certificates", content).Result;
-                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<CertificatesMessagesModel>();
+                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<ProcessCertificatesMessagesModel>();
                 return messages;
             }
         }

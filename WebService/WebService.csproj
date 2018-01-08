@@ -96,8 +96,8 @@
     <Compile Include="Models\Account\Header.cs" />
     <Compile Include="Models\Account\TokenResult.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
-    <Compile Include="Models\invoices\NewReplaceAdjustInvoice\CertificatesMessagesModel.cs" />
-    <Compile Include="Models\invoices\NewReplaceAdjustInvoice\CertificatesModel.cs" />
+    <Compile Include="Models\invoices\NewReplaceAdjustInvoice\ProcessCertificatesMessagesModel.cs" />
+    <Compile Include="Models\invoices\NewReplaceAdjustInvoice\ProcessCertificatesModel.cs" />
     <Compile Include="Models\invoices\NewReplaceAdjustInvoice\ReplaceInsuranceInvoiceMessagesModel.cs" />
     <Compile Include="Models\invoices\NewReplaceAdjustInvoice\ReplaceInsuranceInvoiceModel.cs" />
     <Compile Include="Models\invoices\NewReplaceAdjustInvoice\NewReplaceAdjustInvoiceMessagesModel.cs" />
