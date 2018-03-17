@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace WebService.Models.invoices.NewReplaceAdjustInvoice
+namespace WebService.Models.Invoices.NewChangeDeleteInvoice
 {
     /// <summary>
     /// NewReplaceAdjust
     /// NoticeStateChangedInsuranceInvoice
     /// DeleteInsuranceInvoice
     /// </summary>
-    public class NewReplaceAdjustInvoiceMessagesModel
+    public class NewAdjustReplaceInvoiceMessagesModel
     {
         /// <summary>
         /// ID của thông điệp
@@ -28,6 +28,12 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// Trạng thái của lời gọi: “SUCCESS” Thành công “FAIL”  Thất bại
         /// </summary>
         public string State { get; set; }
+
+        /// <summary>
+        /// Tình trạng lời gọi:
+        /// (Trường này trong thay đổi trạng thái hóa đơn)
+        /// </summary>
+        public string Status { get; set; }
 
         /// <summary>
         /// Mã lỗi (chỉ khi STATUS=FAIL)

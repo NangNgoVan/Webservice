@@ -8,9 +8,12 @@ using System.Web.Services;
 using System.Web.Services.Protocols;
 using WebService.Enum;
 using WebService.Models.Account;
-using WebService.Models.invoices.NewReplaceAdjustInvoice;
 using WebService.Shared.Enums;
 using WebService.Shared.Serialize;
+using WebService.Models.Invoices.NewChangeDeleteInvoice;
+using System.Xml;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace WebService.Services
 {
@@ -28,15 +31,16 @@ namespace WebService.Services
         private static readonly string BaseUri = ConfigurationManager.AppSettings["BaseUri"];
         public Header InHeader;
 
+        private static readonly string Username = ConfigurationManager.AppSettings["Username"];
+        private static readonly string Password = ConfigurationManager.AppSettings["Password"];
+
         [WebMethod(Description = "New, Replace, Adjust.Bên gửi: Hệ thống core bảo hiểm của CMC. Bên nhận: Hệ thống HDĐT của EInvoice")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public NewReplaceAdjustInvoiceMessagesModel CreateInsuranceInvoice(NewReplaceAdjustInvoiceModel XMLINPUT)
+        //[SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
+        public NewAdjustReplaceInvoiceMessagesModel CreateInvoice(NewAdjustReplaceInvoiceModel XMLINPUT)
         {
 
-            if (string.IsNullOrEmpty(InHeader.Username) || string.IsNullOrEmpty(InHeader.Password))
-                return NewReplaceAdjustInvoiceMesages(400,"Tài khoản và mật khẩu không được để trống!");
+            var token = Login(new LoginModel {UserName = Username, Password = Password});
 
-            var token = Login(new LoginModel {UserName = InHeader.Username, Password = InHeader.Password});
             if (string.IsNullOrEmpty(token))
                 return NewReplaceAdjustInvoiceMesages(400, "Tài khoản hoặc mật khẩu không đúng!");
             
@@ -45,35 +49,58 @@ namespace WebService.Services
                 //specify to use TLS 1.2 as default connection
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
                 ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
                 client.BaseAddress = new Uri(BaseUri);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
                 HttpContent content = new StringContent(XMLINPUT.JsonSerilaize(), Encoding.UTF8,
                     "application/json");
-                var response = client.PostAsync("/api/invoices/create-insurance", content).Result;
-                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<NewReplaceAdjustInvoiceMessagesModel>();
-                return messages;
+                try
+                {
+                    var response = client.PostAsync("/api/invoice-mic/create", content).Result;
+
+                    if(!response.IsSuccessStatusCode)
+                    {
+                        return NewReplaceAdjustInvoiceMesages((int)response.StatusCode, response.ReasonPhrase);
+                    }
+                    var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<NewAdjustReplaceInvoiceMessagesModel>();
+
+                    if(messages == null) return NewReplaceAdjustInvoiceMesages(400, "Lỗi nhận dữ liệu.");
+
+                    return messages;
+                }
+                catch(Exception e)
+                {
+                    return NewReplaceAdjustInvoiceMesages(400, "Đã xảy ra lỗi: "+ e.ToString());
+                }
             }
         }
-        
+
         [WebMethod(Description = "Bên gửi: Hệ thống HDĐT của EInvoice. Bên nhận: Hệ thống core bảo hiểm của CMC")]
         [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public string NoticeStateChangedInsuranceInvoice(NewReplaceAdjustInvoiceMessagesModel XMLINPUT)
+        public string RequestChangedInvoiceState(NewAdjustReplaceInvoiceMessagesModel XMLINPUT)
         {
             return "chờ bên CMS cấp link";
         }
 
         [WebMethod(Description = "Bên gửi: Hệ thống core bảo hiểm của CMC. Bên nhận: Hệ thống HDĐT của EInvoice")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public NewReplaceAdjustInvoiceMessagesModel DeleteInsuranceInvoice(NewReplaceAdjustInvoiceMessagesModel XMLINPUT)
-        {
-            if (string.IsNullOrEmpty(InHeader.Username) || string.IsNullOrEmpty(InHeader.Password))
-                return NewReplaceAdjustInvoiceMesages(400, "Tài khoản và mật khẩu không được để trống!");
+        //[SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
+        public NewAdjustReplaceInvoiceMessagesModel DeleteInvoice(NewAdjustReplaceInvoiceMessagesModel XMLINPUT)
+         {
 
-            var token = Login(new LoginModel { UserName = InHeader.Username, Password = InHeader.Password });
+            var token = Login(new LoginModel { UserName = Username, Password = Password });
+
             if (string.IsNullOrEmpty(token))
-                return NewReplaceAdjustInvoiceMesages(400, "Tài khoản hoặc mật khẩu không đúng!");
+                return new NewAdjustReplaceInvoiceMessagesModel()
+                {
+                    MessageID = XMLINPUT.MessageID,
+                    MessageTime = DateTime.Now,
+                    Status = "FAIL",
+                    ErrorCode = 400,
+                    ErrorDesc = "Tài khoản hoặc mật khẩu không đúng!"
+                };
 
             using (var client = new HttpClient())
             {
@@ -85,49 +112,55 @@ namespace WebService.Services
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                 HttpContent content = new StringContent(XMLINPUT.JsonSerilaize(), Encoding.UTF8,
                     "application/json");
-                var response = client.PostAsync("/api/invoices/delete-insurance", content).Result;
-                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<NewReplaceAdjustInvoiceMessagesModel>();
-                return messages;
+                try
+                {
+                    var response = client.PostAsync("/api/invoice-mic/delete", content).Result;
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return new NewAdjustReplaceInvoiceMessagesModel()
+                        {
+                            MessageID = XMLINPUT.MessageID,
+                            MessageTime = DateTime.Now,
+                            Status = "FAIL",
+                            ErrorCode = (int)response.StatusCode,
+                            ErrorDesc = response.ReasonPhrase
+                        };
+                    }
+
+
+                    var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<NewAdjustReplaceInvoiceMessagesModel>();
+                    return messages;
+                }
+                catch(Exception e)
+                {
+                    return new NewAdjustReplaceInvoiceMessagesModel()
+                    {
+                        MessageID = XMLINPUT.MessageID,
+                        MessageTime = DateTime.Now,
+                        Status = "FAIL",
+                        ErrorCode = 400,
+                        ErrorDesc = "Đã có lỗi xảy ra ("+ e.ToString()+")"
+                    };
+                }
             }
         }
 
         [WebMethod(Description = "Bên gửi: Hệ thống core bảo hiểm của CMC. Bên nhận: Hệ thống HDĐT của EInvoice")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public ReplaceInsuranceInvoiceMessagesModel ReplaceInsuranceInvoice(ReplaceInsuranceInvoiceModel XMLINPUT)
-        {
-            if (string.IsNullOrEmpty(InHeader.Username) || string.IsNullOrEmpty(InHeader.Password))
-                return new ReplaceInsuranceInvoiceMessagesModel();
-
-            var token = Login(new LoginModel { UserName = InHeader.Username, Password = InHeader.Password });
-            if (string.IsNullOrEmpty(token))
-                return new ReplaceInsuranceInvoiceMessagesModel();
-
-            using (var client = new HttpClient())
-            {
-                //specify to use TLS 1.2 as default connection
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-                client.BaseAddress = new Uri(BaseUri);
-                client.DefaultRequestHeaders.Accept.Clear();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-                HttpContent content = new StringContent(XMLINPUT.JsonSerilaize(), Encoding.UTF8,
-                    "application/json");
-                var response = client.PostAsync("/api/invoices/replace-insurance", content).Result;
-                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<ReplaceInsuranceInvoiceMessagesModel>();
-                return messages;
-            }
-        }
-
-        [WebMethod(Description = "Bên gửi: Hệ thống core bảo hiểm của CMC. Bên nhận: Hệ thống HDĐT của EInvoice")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
+        //[SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
         public ProcessCertificatesMessagesModel ProcessCertificates(ProcessCertificatesModel XMLINPUT)
         {
-            if (string.IsNullOrEmpty(InHeader.Username) || string.IsNullOrEmpty(InHeader.Password))
-                return new ProcessCertificatesMessagesModel();
 
-            var token = Login(new LoginModel { UserName = InHeader.Username, Password = InHeader.Password });
+            var token = Login(new LoginModel { UserName = Username, Password = Password });
             if (string.IsNullOrEmpty(token))
-                return new ProcessCertificatesMessagesModel();
+                return new ProcessCertificatesMessagesModel()
+                {
+                    MessageID = XMLINPUT.MessageID,
+                    MessageTime = DateTime.Now,
+                    Status = "FAIL",
+                    ErrorCode = 400,
+                    ErrorDesc = "Tài khoản hoặc mật khẩu không đúng!"
+                };
 
             using (var client = new HttpClient())
             {
@@ -139,29 +172,57 @@ namespace WebService.Services
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
                 HttpContent content = new StringContent(XMLINPUT.JsonSerilaize(), Encoding.UTF8,
                     "application/json");
-                var response = client.PostAsync("/api/invoices/process-certificates", content).Result;
-                var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<ProcessCertificatesMessagesModel>();
-                return messages;
+                var x = XMLINPUT.JsonSerilaize();
+                try
+                {
+                    var response = client.PostAsync("/api/invoice-mic/process-certificates", content).Result;
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return new ProcessCertificatesMessagesModel()
+                        {
+                            MessageID = XMLINPUT.MessageID,
+                            MessageTime = DateTime.Now,
+                            Status = "FAIL",
+                            ErrorCode = (int)response.StatusCode,
+                            ErrorDesc = response.ReasonPhrase
+                        };
+                    }
+
+                    var messages = response.Content.ReadAsStringAsync().Result.JsonDeserialize<ProcessCertificatesMessagesModel>();
+                    return messages;
+                }
+                catch(Exception e)
+                {
+                    return new ProcessCertificatesMessagesModel() {
+                        MessageID = XMLINPUT.MessageID,
+                        MessageTime = DateTime.Now,
+                        Status = "FAIL",
+                        ErrorCode = -1,
+                        ErrorDesc = "Đã có lỗi xảy ra ( " + e.ToString()+")"
+                    };
+                }
+               
             }
         }
 
         [WebMethod(Description = "chưa rõ yêu cầu")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public string EInvoiceVerifyInvoices()
+        //[SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
+        public string EInvoice_VerifyInvoices()
         {
             return "Hello World";
         }
 
         [WebMethod(Description = "chưa rõ yêu cầu")]
-        [SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
-        public string EInvoiceVerifyCertificates()
+        //[SoapHeader("InHeader", Direction = SoapHeaderDirection.In)]
+        public string EInvoice_VerifyCertificates()
         {
             return "Hello World";
         }
 
-        private static NewReplaceAdjustInvoiceMessagesModel NewReplaceAdjustInvoiceMesages(int errorCode,string errorDesc)
+        private static NewAdjustReplaceInvoiceMessagesModel NewReplaceAdjustInvoiceMesages(int errorCode,string errorDesc)
         {
-            return new NewReplaceAdjustInvoiceMessagesModel
+            return new NewAdjustReplaceInvoiceMessagesModel
             {
                 MessageID = 0,
                 MessageTime = DateTime.UtcNow,
@@ -169,8 +230,6 @@ namespace WebService.Services
                 State = InsuranceStatus.Fail.ToDisplayName(),
                 ErrorCode = errorCode,
                 ErrorDesc = errorDesc,
-                InvoiceNo = "00",
-                InvoiceState = "0000"
             };
         }
 
@@ -186,15 +245,21 @@ namespace WebService.Services
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 HttpContent content = new StringContent(model.JsonSerilaize(), Encoding.UTF8,
                     "application/json");
-                var response = client.PostAsync("/token", content).Result;
-                if (!response.IsSuccessStatusCode)
+                try
+                {
+                    var response = client.PostAsync("/token", content).Result;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return null;
+                        //throw new Exception(response.Content.ReadAsStringAsync().Result);
+                    }
+                    var data = response.Content.ReadAsStringAsync().Result.JsonDeserialize<TokenResult>();
+                    return data.Data.Token;
+                }
+                catch(Exception e)
                 {
                     return null;
-                    //throw new Exception(response.Content.ReadAsStringAsync().Result);
-                }
-
-                var data = response.Content.ReadAsStringAsync().Result.JsonDeserialize<TokenResult>();
-                return data.Token;
+                }                
             }
         }
     }

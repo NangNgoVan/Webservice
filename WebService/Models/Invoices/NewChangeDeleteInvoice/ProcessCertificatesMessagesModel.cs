@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace WebService.Models.invoices.NewReplaceAdjustInvoice
+namespace WebService.Models.Invoices.NewChangeDeleteInvoice
 {
     public class ProcessCertificatesMessagesModel
     {
@@ -12,14 +13,14 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// <summary>
         /// Thời điểm gửi thông điệp
         /// </summary>
-        public int MessageTime { get; set; }
+        public DateTime MessageTime { get; set; }
 
         /// <summary>
         /// Trạng thái của lời gọi:
         /// “SUCCESS” Thành công
         /// “FAIL”
         /// </summary>
-        public int Status { get; set; }
+        public string Status { get; set; }
 
         /// <summary>
         /// Mã lỗi (chỉ khi STATUS=FAIL)
@@ -29,7 +30,7 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// <summary>
         /// Miêu tả lỗi (chỉ khi STATUS=FAIL)
         /// </summary>
-        public int ErrorDesc { get; set; }
+        public string ErrorDesc { get; set; }
 
         /// <summary>
         /// Group tag cho danh sách các giấy chứng nhận đã huỷ (Chỉ khi STATUS=SUCCESS và có giấy chứng nhận đã huỷ) 

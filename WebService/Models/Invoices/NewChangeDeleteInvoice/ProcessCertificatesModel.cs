@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace WebService.Models.invoices.NewReplaceAdjustInvoice
+namespace WebService.Models.Invoices.NewChangeDeleteInvoice
 {
     public class ProcessCertificatesModel
     {
@@ -15,6 +15,13 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// Thời điểm gửi thông điệp
         /// </summary>
         public DateTime MessageTime { get; set; }
+
+        /// <summary>
+        /// Mục đích của lời gọi web service:
+        /// Draft/"Tạo bản dự thảo cho ấn chỉ"
+        /// Publication/"Phát hành ấn chỉ"
+        /// </summary>
+        public string Intent { get; set; }
 
         /// <summary>
         /// Số hợp đồng bảo hiểm liên kết với GCN
@@ -77,7 +84,7 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// Số giấy chứng nhận cần huỷ.
         /// </summary>
         [XmlElement(IsNullable = false)]
-        public string CertificateSerie { get; set; }
+        public List<string> CertificateSerie { get; set; }
     }
     
     public class NewCertificates
@@ -223,17 +230,17 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         /// <summary>
         /// Tổng Phí bảo hiểm (Có VAT), lấy từ trường “Tổng phí” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Ttoán” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
-        public string TotalFee { get; set; }
+        public double TotalFee { get; set; }
 
         /// <summary>
         /// Tổng tất cả thuế VAT của tất cả các nghiệp vụ bảo hiểm
         /// </summary>
-        public string VAT { get; set; }
+        public double VAT { get; set; }
 
         /// <summary>
         /// Tổng Phí bảo hiểm (Có VAT), lấy từ trường “Tổng phí” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Ttoán” trong bảng điều khoản của tab “Điều khoản chính" trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
         /// </summary>
-        public string TotalFeeWithVAT { get; set; }
+        public double TotalFeeWithVAT { get; set; }
 
         /// <summary>
         /// Thời gian bắt đầu hiệu lực , lấy từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Giờ bắt đầu có hiệu lực" và “Ngày bắt đầu có hiệu lực” (“Hiệu lực từ”) trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”
@@ -254,14 +261,14 @@ namespace WebService.Models.invoices.NewReplaceAdjustInvoice
         ///Thời điểm nộp phí, lấy từ trường “Thời điểm nôp phí” mới thêm vào trong trong màn hình “GCN xe theo hợp đồng” hoặc từ trường “Thời điểm nôp phí” mới thêm trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”.
         ///Lưu ý: Nếu có trường thời điểm nộp phí thì sẽ không có trường thời hạn thanh toán phí và ngược lại.Trên hệ thống ấn chỉ điện tử, nếu có trường thời điểm nộp phí thì trong bản thể hiện của ấn chỉ điện tử sẽ hiển thị thời điểm nộp phí, nếu có trường thời hạn nộp phí sẽ hiển thị thời hạn nộp phí
         /// </summary>
-        public string PaidDate { get; set; }
+        public DateTime PaidDate { get; set; }
 
         /// <summary>
         /// Thời hạn thanh toán phí, lấy thông tin từ tab “Kỳ thanh toán" trong màn hình “Hợp đồng bảo hiểm xe cơ giới” hoặc từ tab “Kỳ thanh toán” trong màn hình “GCN bảo hiểm xe cơ giới bán lẻ”.
         /// -Trường hợp chỉ có một kỳ thanh toán thì lấy ngày công nợ khách hàng trên phần mềm(trường hợp thanh toán đủ phí)
         /// - Trường hợp nhiều kỳ thanh toán thì không lấy giá trị nào cả
         /// </summary>
-        public string PaymentDueDate { get; set; }
+        public DateTime PaymentDueDate { get; set; }
 
         /// <summary>
         /// Số serie của giấy chứng nhận bị thay thế. Nếu có trường này thì giấy chứng nhận mới sẽ thay thế cho giấy chứng nhận cũ với số giấy chứng nhận bị thay thế này
